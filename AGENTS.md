@@ -32,6 +32,18 @@
 - `obsidian_web/` — 存放 Obsidian 笔记（markdown 格式）。一切笔记性质的内容创建到该文件夹
 - 纯文本编辑直接改 markdown 原文；涉及 Obsidian 特色功能（wikilink、properties、bases、canvas 等）优先使用 obsidian cli 相关 skills
 
+## 工程惯例
+
+- 本仓库由 git 追踪（`git init -b main` 已初始化），改动以 commit 记录，同步至 GitHub 远程仓库
+- GitHub 远程仓库：**public**，账号 fghmnst（gh CLI 已登录，SSH 协议）
+- 涉及 sudo 的操作用户自行完成，代理不要执行
+- 提交前检查 `git status` / `git diff`，只暂存预期文件
+
+## 日志约定
+
+- 用户回复"日志"时：阅读当天全部 session 内容，总结"今天干了什么 / 明天该干什么"，写入 `obsidian_web/日志/`（markdown）
+- 子文件夹 `obsidian_web/日志/` 已存在，日志文件名建议带日期（如 `2026-08-23.md`）
+
 ## 待办状态
 
 - 菜单选项点击后的行为未实现（用户选"演示优先"）
