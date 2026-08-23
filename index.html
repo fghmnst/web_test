@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTOTYPE — 开场与菜单</title>
+<style>
+  /* ============================================================
+     PROTOTYPE (throwaway) — 回答的问题：
+     "开场 → 点击任意处 → 头像右移 + 左侧菜单浮现" 这个交互，
+     菜单界面的结构应该长什么样？
+     3 个变体通过 ?variant=a|b|c 切换，底部浮动栏也可切换。
+     配色为临时柔和低饱和占位，正式色板待定。
+     网名与头像均为占位。
+     ============================================================ */
+
+  :root {
+    --bg:      #f4f1ea;   /* 暖白 */
+    --ink:     #3d3a36;   /* 墨色 */
+    --ink-soft:#8a857c;   /* 次级墨色 */
+    --green:   #7a9b76;
+    --blue:    #8ba3b8;
+    --rose:    #c9a7a0;
+    --sand:    #d9c49a;
+    --panel:   #fffdf8;
+    --line:    #d8d2c5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @font-face {
+    font-family: 'BigBlue';
+    src: url('fonts/BigBlueTerm437NerdFont-Regular.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'Mononoki';
+    src: url('fonts/MononokiNerdFont-Regular.ttf') format('truetype');
+  }
+
+  html, body { height: 100%; }
+  body {
+    font-family: 'Mononoki', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    overflow: hidden;
+  }
+
+  #app {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(120% 90% at 30% 20%, #fdfbf5 0%, var(--bg) 55%, #ece7da 100%);
+  }
+
+  /* ---------- 像素云（招牌动效 1：缓慢漂移） ---------- */
+  .cloud {
+    position: absolute;
+    opacity: .55;
+    image-rendering: pixelated;
+    animation: drift linear infinite;
+    pointer-events: none;
+  }
+  .cloud svg { display: block; width: 100%; height: 100%; }
+  .c1 { width: 180px; height: 40px; top: 12%; left: -200px;  animation-duration: 90s; }
+  .c2 { width: 120px; height: 28px; top: 30%; left: -140px;  animation-duration: 65s; }
+  .c3 { width: 150px; height: 34px; top: 62%; left: -170px;  animation-duration: 110s; }
+  @keyframes drift { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 400px)); } }
+
+  /* ---------- 开场（三个变体共用，按你的描述实现） ---------- */
+  #stage {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 18px;
+    cursor: pointer;
+    z-index: 2;
+  }
+  body.started #stage { cursor: default; }
+  body.started #stage .handle,
+  body.started #stage .press { opacity: 0; }
+
+  #avatar {
+    width: 150px; height: 150px;
+    filter: drop-shadow(6px 6px 0 rgba(61,58,54,.12));
+    transition: transform .9s cubic-bezier(.34,1.3,.5,1), opacity .4s ease;
+  }
+  #avatar svg { width: 100%; height: 100%; shape-rendering: crispEdges; }
+
+  .handle {
+    font-family: 'BigBlue', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    font-size: 42px;
+    letter-spacing: 6px;
+    transition: opacity .3s ease;
+  }
+
+  .press {
+    font-size: 15px;
+    color: var(--ink-soft);
+    animation: blink 1.6s steps(1) infinite;
+    transition: opacity .3s ease;
+  }
+  @keyframes blink { 0%,55% { opacity: 1; } 56%,100% { opacity: .12; } }
+
+  /* ---------- 点击后：头像移到右侧（各变体微调） ---------- */
+  body.started #avatar { transform: translateX(25vw); }
+
+  /* ---------- 菜单（各变体独立实现） ---------- */
+  .menu { position: absolute; z-index: 3; display: none; }
+  body.started .menu { display: block; }
+
+  /* ================= 变体 A：经典游戏标题菜单 ================= */
+  body.started .variant-a .menu { display: flex; }
+  .variant-a .menu {
+    top: 50%; left: 10%;
+    transform: translateY(-50%);
+    flex-direction: column; gap: 22px;
+  }
+  .variant-a .menu-label {
+    font-family: 'BigBlue', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    font-size: 13px; letter-spacing: 4px; color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .variant-a .btn {
+    font-family: 'Mononoki', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    font-size: 20px; color: var(--ink);
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    box-shadow: 4px 4px 0 rgba(61,58,54,.18);
+    padding: 14px 46px;
+    cursor: pointer;
+    transition: transform .08s, box-shadow .08s, background .15s;
+    text-align: center;
+  }
+  .variant-a .btn:hover {
+    background: var(--sand);
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 rgba(61,58,54,.18);
+  }
+  .variant-a .btn:active { transform: translate(4px,4px); box-shadow: none; }
+
+  /* 头像变大 + 待机晃动（招牌动效 2） */
+  body.started.variant-a #avatar {
+    transform: translateX(23vw) scale(1.25);
+    animation: bob 2.6s ease-in-out infinite;
+  }
+  @keyframes bob { 0%,100% { margin-top: 0; } 50% { margin-top: -12px; } }
+
+  /* ================= 变体 B：像素窗口面板 ================= */
+  .variant-b .menu {
+    top: 50%; left: 9%;
+    transform: translateY(-50%);
+    width: 380px;
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    box-shadow: 6px 6px 0 rgba(61,58,54,.15);
+  }
+  .variant-b .win-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--green);
+    border-bottom: 4px solid var(--ink);
+    padding: 8px 12px;
+    font-family: 'BigBlue', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    font-size: 13px; letter-spacing: 2px;
+  }
+  .variant-b .win-bar .dot { width: 14px; height: 14px; border: 2px solid var(--ink); }
+  .variant-b .win-bar .dot:last-child { margin-left: auto; background: var(--rose); }
+  .variant-b .item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 20px;
+    border-bottom: 2px solid var(--line);
+    cursor: pointer;
+    font-size: 17px;
+    transition: background .15s;
+  }
+  .variant-b .item:last-child { border-bottom: none; }
+  .variant-b .item:hover { background: #f3efdd; }
+  .variant-b .item .ico { width: 26px; height: 26px; flex: none; }
+  .variant-b .item .ico svg { width: 100%; height: 100%; shape-rendering: crispEdges; }
+
+  /* 头像右上角的卡片（变体 B 特有布局） */
+  .avatar-card {
+    display: none;
+    position: absolute; z-index: 3;
+    top: 10%; right: 10%;
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    box-shadow: 4px 4px 0 rgba(61,58,54,.15);
+    padding: 18px 22px 14px;
+    text-align: center;
+  }
+  body.started.variant-b .avatar-card { display: block; }
+  body.started.variant-b #avatar {
+    opacity: 0; pointer-events: none;
+  }
+  .avatar-card #avatar-b { width: 96px; height: 96px; margin: 0 auto; }
+  .avatar-card #avatar-b svg { width: 100%; height: 100%; shape-rendering: crispEdges; }
+  .avatar-card .nm {
+    font-family: 'BigBlue', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    font-size: 15px; letter-spacing: 3px; margin-top: 8px;
+  }
+
+  /* ================= 变体 C：对话选项 / 文字冒险 ================= */
+  .variant-c .menu {
+    bottom: 9%; left: 8%; right: 34%;
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    box-shadow: 6px 6px 0 rgba(61,58,54,.15);
+    padding: 26px 30px 22px;
+  }
+  .variant-c .dialogue {
+    font-size: 17px; line-height: 1.9;
+    min-height: 3.2em;
+  }
+  .variant-c .opts { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  .variant-c .opt { font-size: 16px; cursor: pointer; transition: padding-left .12s, color .12s; }
+  .variant-c .opt:hover { padding-left: 14px; color: var(--green); }
+  body.started.variant-c #avatar {
+    transform: translateX(26vw) translateY(30vh) scale(.85);
+    animation: bob 2.6s ease-in-out infinite;
+  }
+
+  /* ============ 底部变体切换条（prototype 专用，生产隐藏） ============ */
+  #switcher {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 14px;
+    background: var(--ink); color: var(--panel);
+    padding: 8px 16px;
+    font-size: 13px;
+    box-shadow: 3px 3px 0 rgba(61,58,54,.3);
+    z-index: 99;
+  }
+  #switcher button {
+    background: none; border: none; color: var(--sand);
+    font-size: 16px; cursor: pointer; font-family: 'BigBlue', monospace;
+  }
+  #switcher button:hover { color: #fff; }
+  #switcher .v-name { letter-spacing: 1px; min-width: 160px; text-align: center; }
+</style>
+</head>
+<body id="app" data-variant="a" class="variant-a">
+  <noscript><p style="padding:20px">请启用 JavaScript 以查看原型。</p></noscript>
+
+  <!-- 开场画面（共用） -->
+  <div id="stage">
+    <div class="cloud c1" id="cloud-a"></div>
+    <div class="cloud c2" id="cloud-b"></div>
+    <div class="cloud c3" id="cloud-c"></div>
+    <div id="avatar"></div>
+    <h1 class="handle">FGH</h1>
+    <p class="press">点击任意处开始</p>
+  </div>
+
+  <!-- 变体 A 菜单：经典游戏标题菜单 -->
+  <nav class="menu">
+    <div class="menu-label">— MENU —</div>
+    <button class="btn">欢迎</button>
+    <button class="btn">选项二</button>
+    <button class="btn">选项三</button>
+  </nav>
+
+  <!-- 变体 B 菜单：像素窗口面板 -->
+  <div class="menu win">
+    <div class="win-bar"><span>MAIN</span><span class="dot"></span><span class="dot"></span></div>
+    <div class="item"><span class="ico" id="ico-home"></span>欢迎</div>
+    <div class="item"><span class="ico" id="ico-star"></span>选项二</div>
+    <div class="item"><span class="ico" id="ico-heart"></span>选项三</div>
+  </div>
+
+  <!-- 变体 B 的头像卡 -->
+  <div class="avatar-card">
+    <div id="avatar-b"></div>
+    <div class="nm">FGH</div>
+  </div>
+
+  <!-- 变体 C 菜单：对话选项 -->
+  <div class="menu">
+    <div class="dialogue" id="typing">你好，我是 FGH。欢迎来到我的小站。</div>
+    <div class="opts">
+      <div class="opt">» 欢迎</div>
+      <div class="opt">» 选项二</div>
+      <div class="opt">» 选项三</div>
+    </div>
+  </div>
+
+  <!-- 变体切换条 -->
+  <div id="switcher">
+    <button id="prev" title="上一个变体">◀</button>
+    <span class="v-name" id="vname">A — 经典标题菜单</span>
+    <button id="next" title="下一个变体">▶</button>
+  </div>
+
+<script>
+  /* ============ 像素素材：代码生成（占位头像 + 装饰） ============ */
+
+  const AVATAR_MAP = [
+    "....hhhhhhhh....",
+    "..hhhhhhhhhhhh..",
+    ".hhhhhhhhhhhhhh.",
+    ".hhhhsssssshhhh.",
+    "hhsssssssssssshh",
+    "hhsssssssssssshh",
+    "hssssssssssssssh",
+    "ssssssssssssssss",
+    "sssseesssseessss",
+    "sssseesssseessss",
+    "sssbbssssssbbsss",
+    "ssssssmmmmssssss",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "tttttttttttttttt",
+    "tttttttttttttttt"
+  ];
+  const AVATAR_PALETTE = {
+    h: "#4a3b32",  // 发色
+    s: "#efd3b3",  // 肤色
+    e: "#3d3a36",  // 眼睛
+    b: "#d9a08a",  // 腮红
+    m: "#b06a5b",  // 嘴
+    t: "#8ba3b8"   // 衣服（柔和蓝）
+  };
+
+  function pixelSvg(map, palette, scale = 1) {
+    const h = map.length, w = map[0].length;
+    let rects = "";
+    map.forEach((row, y) => {
+      for (let x = 0; x < row.length; x++) {
+        const c = row[x];
+        if (c === "." || !palette[c]) continue;
+        rects += `<rect x="${x*scale}" y="${y*scale}" width="${scale}" height="${scale}" fill="${palette[c]}"/>`;
+      }
+    });
+    return `<svg viewBox="0 0 ${w*scale} ${h*scale}" xmlns="http://www.w3.org/2000/svg">${rects}</svg>`;
+  }
+
+  const cloudSvg = (w, h, color) => {
+    const blocks = [];
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++)
+        if (Math.random() > 0.35) blocks.push(`<rect x="${x*10}" y="${y*10}" width="10" height="10" fill="${color}"/>`);
+    return `<svg viewBox="0 0 ${w*10} ${h*10}" xmlns="http://www.w3.org/2000/svg">${blocks.join("")}</svg>`;
+  };
+
+  /* 小图标素材 */
+  const ICO_HOME = [
+    "......hh......",
+    "....hhhhhh....",
+    "..hhhhhhhhhh..",
+    "hhhddddddddhhh",
+    "hhhddddddddhhh",
+    "hhddddddddddhh",
+    "hhddwwddddddhh",
+    "hhddddddddddhh",
+    "hhddddwwddddhh",
+    "hhddddddddddhh",
+    "hhddddddddddhh",
+    "hhddddddddddhh",
+    "hhhddddddddhhh",
+    "hhhddddddddhhh",
+    "hhhhhhhhhhhhhh",
+    "................"
+  ];
+  const ICO_STAR = [
+    "......yy......",
+    "......yy......",
+    ".....yyyy.....",
+    "..yyyyyyygyy..",
+    ".yyyyyyyyyygy.",
+    "yyyyyyyyyyyggy",
+    "yyyyyyyyyyyyyg",
+    "ygyyyyyyyyyyyy",
+    "..yyyyyyyyygy.",
+    "..gyyyyyyygy..",
+    "...gyyyygyy...",
+    "....gyygyy....",
+    "....gyyyyy....",
+    "...gyy..gyy...",
+    "..gyy....gyy..",
+    "............."
+  ];
+  const ICO_HEART = [
+    ".rr....rr.",
+    "rrrr..rrrr",
+    "rrrrrrrrrr",
+    ".rrrrrrrr.",
+    "..rrrrrr..",
+    "...rrrr...",
+    "....rr....",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    "..........",
+    ".........."
+  ];
+
+  /* ============ 渲染 ============ */
+  const avatarSvg = pixelSvg(AVATAR_MAP, AVATAR_PALETTE);
+  document.getElementById("avatar").innerHTML = avatarSvg;
+  document.getElementById("avatar-b").innerHTML = avatarSvg;
+  document.getElementById("cloud-a").innerHTML = cloudSvg(18, 4, "#d9d3c4");
+  document.getElementById("cloud-b").innerHTML = cloudSvg(12, 3, "#d9d3c4");
+  document.getElementById("cloud-c").innerHTML = cloudSvg(15, 3, "#d9d3c4");
+  document.getElementById("ico-home").innerHTML = pixelSvg(ICO_HOME, { h:"#4a3b32", d:"#8ba3b8", w:"#f4f1ea" });
+  document.getElementById("ico-star").innerHTML = pixelSvg(ICO_STAR, { y:"#d9c49a", g:"#c9a7a0" });
+  document.getElementById("ico-heart").innerHTML = pixelSvg(ICO_HEART, { r:"#c9a7a0" });
+
+  /* ============ 交互：点击任意处开始 ============ */
+  const stage = document.getElementById("stage");
+  stage.addEventListener("click", () => document.body.classList.add("started"));
+
+  /* ============ 变体 C：打字机效果 ============ */
+  (function typewriter() {
+    const el = document.getElementById("typing");
+    const text = el.textContent;
+    let i = 0;
+    el.textContent = "";
+    const tick = () => {
+      if (i <= text.length) {
+        el.textContent = text.slice(0, i) + (i < text.length ? "▍" : "");
+        i++;
+        setTimeout(tick, 90);
+      }
+    };
+    stage.addEventListener("click", tick, { once: true });
+  })();
+
+  /* ============ 变体切换（prototype 专用） ============ */
+  const VARIANTS = [
+    { key: "a", name: "A — 经典标题菜单" },
+    { key: "b", name: "B — 像素窗口面板" },
+    { key: "c", name: "C — 对话选项" }
+  ];
+  let current = VARIANTS.findIndex(v => v.key === new URLSearchParams(location.search).get("variant"));
+  if (current < 0) current = 0;
+
+  function applyVariant(i) {
+    current = (i + VARIANTS.length) % VARIANTS.length;
+    const v = VARIANTS[current];
+    document.body.dataset.variant = v.key;
+    document.body.className = "variant-" + v.key + (document.body.classList.contains("started") ? " started" : "");
+    document.getElementById("vname").textContent = v.name;
+    history.replaceState(null, "", "?variant=" + v.key);
+  }
+  document.getElementById("prev").addEventListener("click", () => applyVariant(current - 1));
+  document.getElementById("next").addEventListener("click", () => applyVariant(current + 1));
+  document.addEventListener("keydown", e => {
+    const t = e.target;
+    if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable) return;
+    if (e.key === "ArrowLeft") applyVariant(current - 1);
+    if (e.key === "ArrowRight") applyVariant(current + 1);
+  });
+  applyVariant(current);
+</script>
+</body>
+</html>

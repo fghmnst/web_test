@@ -1,0 +1,39 @@
+# AGENTS.md
+
+个人像素风网站，当前处于 **prototype 阶段**（index.html 顶部有 PROTOTYPE 标记）。纯 HTML/CSS/JS，无构建工具、无 package.json、无测试框架。所有设计决策只存在于与用户的访谈对话中，没有文档——改动前先与用户确认。
+
+## 运行与验证
+
+- 本地预览：`python3 -m http.server 8000` → http://localhost:8000/index.html
+- JS 语法检查：`sed -n '/<script>/,/<\/script>/p' index.html | sed '1d;$d' > /tmp/x.js && node --check /tmp/x.js`
+- 无 lint/typecheck/test，浏览器手动验证。
+
+## 结构
+
+- `index.html` — 单文件原型，内嵌全部 CSS/JS。3 个 UI 变体（A 经典标题菜单 / B 像素窗口面板 / C 对话选项），通过 `?variant=a|b|c` 或底部浮动栏（含 ←/→ 键盘）切换。变体胜出后需折进正式实现并移除切换条。
+- `fonts/` — 两套 Nerd Font（各 2.3MB，上线前需裁剪子集）：
+  - `BigBlueTerm437NerdFont-Regular.ttf` — 仅用于拉丁标题（font-family: `BigBlue`）
+  - `MononokiNerdFont-Regular.ttf` — 正文（font-family: `Mononoki`）
+  - 中文一律回退系统字体（两套字体均无中文字形）
+  - 字体源文件在 `/mnt/d/OhMyPosh/fonts/`（Windows D 盘挂载），含 LICENSE 已随附。
+
+## 已锁定的设计决策（访谈确认，勿擅自更改）
+
+- 技术栈：纯三件套；多页结构已让位于"开场 + 菜单"单页交互
+- 交互：开场居中头像 + 网名 + 闪烁"点击任意处开始" → 点击后头像右移、左侧浮现菜单（欢迎/选项二/选项三，选项内容未定）
+- 视觉：整体如像素画（非游戏 UI）；像素素材全部代码生成（JS 里 `AVATAR_MAP` 等字符串数组 + `pixelSvg()` 渲染），改素材改代码，不用图片文件
+- 配色：**待定**——当前 :root 变量是临时柔和低饱和占位
+- 头像、网名（FGH）均为占位，等用户提供
+- 动效：轻量 CSS 为主 + 少量招牌动效（云漂移、待机晃动、打字机）
+- 移动端：只需"能看"级别
+
+## 笔记约定
+
+- `obsidian_web/` — 存放 Obsidian 笔记（markdown 格式）。一切笔记性质的内容创建到该文件夹
+- 纯文本编辑直接改 markdown 原文；涉及 Obsidian 特色功能（wikilink、properties、bases、canvas 等）优先使用 obsidian cli 相关 skills
+
+## 待办状态
+
+- 菜单选项点击后的行为未实现（用户选"演示优先"）
+- 用户将自行决定爱好内容、正式配色、网名、头像
+- 暂不上线（部署方式后定）
