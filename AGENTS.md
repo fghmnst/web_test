@@ -4,9 +4,8 @@
 
 ## 运行与验证
 
-- 本地预览：`cd /home/fgh/web_test && python3 -m http.server 8000` → http://localhost:8000/index.html
-  - 若访问报 404：服务器一定启动在了错误目录（http.server 以当前目录为根）；用 `pgrep -f http.server` + `readlink /proc/<pid>/cwd` 确认，杀掉后在项目目录重启，或用 `python3 -m http.server 8000 --directory /home/fgh/web_test`
-  - 该进程不抗重启，每次会话开始需确认 8000 端口在监听
+- 本地预览：VS Code **Live Server 插件**（默认端口 5500）——右键 `index.html` → "Open with Live Server"，或状态栏 "Go Live"；以 `/home/fgh/web_test` 为工作区根目录打开，否则 5500 根目录不对；保存自动刷新
+  - 旧方案已弃用：`python3 -m http.server 8000` 进程不抗重启且易因启动目录错误导致 404（排查：`pgrep -f http.server` + `readlink /proc/<pid>/cwd`）；不要再启动 8000 端口服务器
 - JS 语法检查：`sed -n '/<script>/,/<\/script>/p' index.html | sed '1d;$d' > /tmp/x.js && node --check /tmp/x.js`
 - 无 lint/typecheck/test，浏览器手动验证。
 
