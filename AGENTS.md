@@ -4,7 +4,9 @@
 
 ## 运行与验证
 
-- 本地预览：`python3 -m http.server 8000` → http://localhost:8000/index.html
+- 本地预览：`cd /home/fgh/web_test && python3 -m http.server 8000` → http://localhost:8000/index.html
+  - 若访问报 404：服务器一定启动在了错误目录（http.server 以当前目录为根）；用 `pgrep -f http.server` + `readlink /proc/<pid>/cwd` 确认，杀掉后在项目目录重启，或用 `python3 -m http.server 8000 --directory /home/fgh/web_test`
+  - 该进程不抗重启，每次会话开始需确认 8000 端口在监听
 - JS 语法检查：`sed -n '/<script>/,/<\/script>/p' index.html | sed '1d;$d' > /tmp/x.js && node --check /tmp/x.js`
 - 无 lint/typecheck/test，浏览器手动验证。
 
