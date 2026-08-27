@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "日志/2026-08-23.md",
+                "file": "日志/2026-08-26.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2026-08-23"
+              "title": "2026-08-26"
             }
           }
         ]
@@ -189,5 +189,7 @@
     }
   },
   "active": "2101a0acedd49fd8",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "日志/2026-08-23.md"
+  ]
 }
