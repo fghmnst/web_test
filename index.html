@@ -9,15 +9,14 @@
      PROTOTYPE (throwaway) — 回答的问题：
      "开场 → 点击任意处 → 头像右移 + 左侧菜单浮现" 这个交互。
      变体 A（经典游戏标题菜单）已胜出，B/C 变体与切换条已移除。
-     配色已切换为暮紫蓝系 7 色（用户提供，待确认）。
-     背景已重绘为黄昏雪山场景（参考 sucai/duel-at-dusk + mountain-majesty），
-     全程序化生成：紫粉天空、大太阳、远山、中央雪山与瀑布、近景松树剪影、飞鸟。
-       网名与头像均为占位。
-      ============================================================ */
+     背景：暂时为 #2E3A58 纯色（用户指示全部推倒重来，样式待定）。
+     头像：avatar.jpg（用户提供照片）；网名：fghmnst。
+     菜单：英文选项 + BigBlue 字体。
+     ============================================================ */
 
   :root {
-    --bg:      #0D1322;   /* 暗墨蓝 — 页面背景 */
-    --panel:   #3D4E75;   /* 蓝紫雾 — 面板/按钮底色 */
+    --bg:      #2E3A58;   /* 纯色背景（临时，已加深） */
+    --panel:   #4E6496;   /* 按钮底色（提亮一档，避免与背景同色） */
     --line:    #58618E;   /* 暮紫蓝 — 边框/描边 */
     --ink:     #F3B280;   /* 杏黄橙 — 主文字 */
     --ink-soft:#896B85;   /* 灰粉紫 — 次级文字 */
@@ -49,28 +48,6 @@
     background: var(--bg);
   }
 
-  /* ---------- 背景场景：代码生成（参考 sucai/duel-at-dusk：远山 + 夕阳，去黑草地与人物） ---------- */
-  #bg {
-    position: absolute; inset: 0;
-    z-index: 0;
-    pointer-events: none;
-  }
-  #bg svg { display: block; width: 100%; height: 100%; shape-rendering: crispEdges; }
-
-  /* ---------- 像素云（招牌动效 1：缓慢漂移） ---------- */
-  .cloud {
-    position: absolute;
-    opacity: .55;
-    image-rendering: pixelated;
-    animation: drift linear infinite;
-    pointer-events: none;
-  }
-  .cloud svg { display: block; width: 100%; height: 100%; }
-  .c1 { width: 180px; height: 40px; top: 12%; left: -200px;  animation-duration: 90s; }
-  .c2 { width: 120px; height: 28px; top: 30%; left: -140px;  animation-duration: 65s; }
-  .c3 { width: 150px; height: 34px; top: 20%; left: -170px;  animation-duration: 110s; }
-  @keyframes drift { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 400px)); } }
-
   /* ---------- 开场：头像 + 网名（整体缩放，点击后放大右移） ---------- */
   #stage {
     position: absolute; inset: 0;
@@ -81,7 +58,6 @@
     z-index: 2;
   }
   body.started #stage { cursor: default; }
-  body.started #stage .press { opacity: 0; }
 
   .hero {
     display: flex; flex-direction: column;
@@ -92,26 +68,18 @@
   body.started .hero { transform: translateX(23vw) scale(1.25); }  /* 点击后：放大 + 右移 */
 
   #avatar {
-    width: 150px; height: 150px;
+    width: 110px; height: 110px;
     filter: drop-shadow(6px 6px 0 rgba(0,0,0,.5));
   }
-  #avatar svg { width: 100%; height: 100%; shape-rendering: crispEdges; }
+  #avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   body.started #avatar { animation: bob 2.6s ease-in-out infinite; }  /* 待机晃动（招牌动效 2） */
-  @keyframes bob { 0%,100% { margin-top: 0; } 50% { margin-top: -12px; } }
+  @keyframes bob { 0%,100% { margin-top: 0; } 50% { margin-top: -9px; } }
 
   .handle {
     font-family: 'BigBlue', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
-    font-size: 42px;
-    letter-spacing: 6px;
+    font-size: 30px;
+    letter-spacing: 4px;
   }
-
-  .press {
-    font-size: 15px;
-    color: var(--ink);
-    animation: blink 1.6s steps(1) infinite;
-    transition: opacity .3s ease;
-  }
-  @keyframes blink { 0%,55% { opacity: 1; } 56%,100% { opacity: .12; } }
 
   /* ---------- 菜单：经典游戏标题菜单（变体 A 胜出） ---------- */
   .menu {
@@ -119,7 +87,7 @@
     display: none;
     top: 50%; left: 10%;
     transform: translateY(-50%);
-    flex-direction: column; gap: 22px;
+    flex-direction: column; gap: 30px;
   }
   body.started .menu { display: flex; }
 
@@ -130,12 +98,12 @@
   }
 
   .btn {
-    font-family: 'Mononoki', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
-    font-size: 20px; color: var(--ink);
+    font-family: 'BigBlue', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    font-size: 26px; color: var(--ink);
     background: var(--panel);
     border: 4px solid var(--line);
     box-shadow: 4px 4px 0 rgba(0,0,0,.5);
-    padding: 14px 46px;
+    padding: 18px 60px;
     cursor: pointer;
     transition: transform .08s, box-shadow .08s, background .15s;
     text-align: center;
@@ -151,203 +119,23 @@
 <body id="app">
   <noscript><p style="padding:20px">请启用 JavaScript 以查看原型。</p></noscript>
 
-  <!-- 背景场景（代码生成） -->
-  <div id="bg"></div>
-
   <!-- 开场画面 -->
   <div id="stage">
-    <div class="cloud c1" id="cloud-a"></div>
-    <div class="cloud c2" id="cloud-b"></div>
-    <div class="cloud c3" id="cloud-c"></div>
     <div class="hero">
-      <div id="avatar"></div>
-      <h1 class="handle">FGH</h1>
+      <div id="avatar"><img src="avatar.jpg" alt="fghmnst"></div>
+      <h1 class="handle">fghmnst</h1>
     </div>
-    <p class="press">点击任意处开始</p>
   </div>
 
   <!-- 菜单 -->
   <nav class="menu">
     <div class="menu-label">— MENU —</div>
-    <button class="btn">欢迎</button>
-    <button class="btn">选项二</button>
-    <button class="btn">选项三</button>
+    <button class="btn">WELCOME</button>
+    <button class="btn">OPTION II</button>
+    <button class="btn">OPTION III</button>
   </nav>
 
 <script>
-  /* ============ 像素素材：代码生成（占位头像 + 背景场景） ============ */
-
-  /* ---------- 背景场景：黄昏天空 + 远山 + 夕阳，参考 sucai/duel-at-dusk ----------
-     构图：蓝紫→紫红→粉橙→金黄渐变天空 + 破碎紫红云带 + 中央主峰与侧峰
-     + 落日沉入山线 + 山脚渐深。按要求去掉黑色草地与人物剪影（以原图色调为准）。 */
-
-  function mulberry(seed) {
-    return function () {
-      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-      return ((t ^ t >>> 14) >>> 0) / 4294967296;
-    };
-  }
-
-  function buildBackground() {
-    const W = 160, H = 90, HORIZON = 64;
-    const g = Array.from({ length: H }, () => new Array(W).fill(null));
-    const set = (x, y, c) => { if (x >= 0 && x < W && y >= 0 && y < H) g[y][x] = c; };
-    const rnd = mulberry(20260827);
-
-    /* 天空 6 段渐变（原图：深蓝紫顶 → 紫红 → 粉 → 暖橙 → 金黄地平线） */
-    const skyStops = [
-      [0,    '#40488C'], [.16, '#5A4E96'], [.34, '#8A5C9E'],
-      [.52, '#C484A0'], [.68, '#E89A78'], [.84, '#F2B478'], [1, '#F8C888']
-    ];
-    for (let y = 0; y < H; y++) {
-      const t = y / (H - 1);
-      let c = skyStops[skyStops.length - 1][1];
-      for (const [stop, color] of skyStops) { if (t <= stop) { c = color; break; } }
-      for (let x = 0; x < W; x++) g[y][x] = c;
-    }
-
-    /* 破碎云带（原图上半空）：紫红→粉紫→近日暖粉，横向锯齿 run */
-    const cloudRow = (y0, y1, cols, density) => {
-      for (let y = y0; y < y1; y++) {
-        const ci = Math.min(cols.length - 1, Math.floor((y - y0) / (y1 - y0) * cols.length + (rnd() - 0.5) * .8));
-        const c = cols[Math.max(0, Math.round(ci))];
-        let x = 0;
-        while (x < W) {
-          const len = 4 + Math.floor(rnd() * 14);
-          if (rnd() < density) for (let i = 0; i < len && x + i < W; i++) set(x + i, y, c);
-          x += len;
-          if (rnd() < .25) x += 2;
-        }
-      }
-    };
-    cloudRow(0, 12, ['#40488C', '#4E4288', '#5F4890'], .55);
-    cloudRow(9, 24, ['#5F4890', '#6B4A8E', '#7A5494'], .72);
-    cloudRow(22, 36, ['#8C5E9C', '#A8709C', '#B8789C'], .68);
-    cloudRow(34, 46, ['#C484A0', '#D0808E', '#DC9082'], .5);
-
-    /* 夕阳：光晕 + 橙盘 + 亮芯，沉入山线后（原图太阳位于主峰与侧峰之间） */
-    const sx = 100, sy = 46;
-    for (let dy = -15; dy <= 15; dy++) for (let dx = -15; dx <= 15; dx++) {
-      const d = Math.hypot(dx, dy);
-      if (d <= 5.4) set(sx + dx, sy + dy, '#FFED9E');
-      else if (d <= 7.2) set(sx + dx, sy + dy, '#F8B360');
-      else if (d <= 9.6) set(sx + dx, sy + dy, '#F0A060');
-      else if (d <= 13) set(sx + dx, sy + dy, '#E89A70');
-    }
-
-    /* 主峰（左亮右暗）+ 副峰 + 左小峰，走势参考原图中央紫山 */
-    const peak = (apexX, apexY, maxHalf, body, bodyDark) => {
-      for (let y = apexY; y <= HORIZON; y++) {
-        const t = (y - apexY) / (HORIZON - apexY);
-        const half = Math.round(maxHalf * t);
-        for (let x = apexX - half; x <= apexX + half; x++) {
-          if (x < 0 || x >= W) continue;
-          set(x, y, (x === apexX && y < apexY + 2) ? '#7A68B4' : (x < apexX ? body : bodyDark));
-        }
-      }
-    };
-    peak(132, 36, 46, '#5C4E92', '#514484');   // 右侧副峰
-    peak(20, 40, 42, '#5A4C90', '#514486');    // 左侧矮峰
-    peak(62, 20, 52, '#6C5CA8', '#5A4C92');    // 中央主峰
-
-    /* 中景紫蓝山脊（原图远山脚）：小起伏 + 山脚无黑草，渐深到画面底 */
-    const ridge = (base, amp, f1, f2, colorTop) => {
-      for (let x = 0; x < W; x++) {
-        const h = base + amp * (0.6 * Math.sin(x * f1 + 1.3) + 0.4 * Math.sin(x * f2 + 0.7)) + rnd() * 2;
-        const y0 = Math.max(0, Math.round(h));
-        for (let y = y0; y < H; y++) set(x, y, colorTop);
-      }
-    };
-    ridge(52, 4.5, 0.09, 0.21, '#4A3E7E');
-
-    /* 山体下部渐暗（原图远山阴影基部），避免纯黑 */
-    for (let y = 58; y < H; y++) {
-      const t = (y - 58) / (H - 58);
-      const c = t < .5 ? '#453B78' : '#3E3570';
-      for (let x = 0; x < W; x++) set(x, y, c);
-    }
-    /* 基部稀疏亮斑（岩石碎粒感） */
-    for (let i = 0; i < 90; i++) {
-      const x = Math.floor(rnd() * W), y = 64 + Math.floor(rnd() * 26);
-      if ((x + y) % 5) set(x, y, '#564C8C');
-    }
-
-    return g;
-  }
-
-  function gridSvg(g) {
-    const W = g[0].length, H = g.length;
-    let r = "";
-    for (let y = 0; y < H; y++) {
-      let x = 0;
-      while (x < W) {
-        const c = g[y][x];
-        let run = 1;
-        while (x + run < W && g[y][x + run] === c) run++;
-        if (c) r += `<rect x="${x}" y="${y}" width="${run}" height="1" fill="${c}"/>`;
-        x += run;
-      }
-    }
-    return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">${r}</svg>`;
-  }
-
-  const AVATAR_MAP = [
-    "....hhhhhhhh....",
-    "..hhhhhhhhhhhh..",
-    ".hhhhhhhhhhhhhh.",
-    ".hhhhsssssshhhh.",
-    "hhsssssssssssshh",
-    "hhsssssssssssshh",
-    "hssssssssssssssh",
-    "ssssssssssssssss",
-    "sssseesssseessss",
-    "sssseesssseessss",
-    "sssbbssssssbbsss",
-    "ssssssmmmmssssss",
-    "ssssssssssssssss",
-    "ssssssssssssssss",
-    "tttttttttttttttt",
-    "tttttttttttttttt"
-  ];
-  const AVATAR_PALETTE = {
-    h: "#4a3b32",  // 发色
-    s: "#efd3b3",  // 肤色
-    e: "#3d3a36",  // 眼睛
-    b: "#d9a08a",  // 腮红
-    m: "#b06a5b",  // 嘴
-    t: "#58618E"   // 衣服（暮紫蓝）
-  };
-
-  function pixelSvg(map, palette, scale = 1) {
-    const h = map.length, w = map[0].length;
-    let rects = "";
-    map.forEach((row, y) => {
-      for (let x = 0; x < row.length; x++) {
-        const c = row[x];
-        if (c === "." || !palette[c]) continue;
-        rects += `<rect x="${x*scale}" y="${y*scale}" width="${scale}" height="${scale}" fill="${palette[c]}"/>`;
-      }
-    });
-    return `<svg viewBox="0 0 ${w*scale} ${h*scale}" xmlns="http://www.w3.org/2000/svg">${rects}</svg>`;
-  }
-
-  const cloudSvg = (w, h, color) => {
-    const blocks = [];
-    for (let y = 0; y < h; y++)
-      for (let x = 0; x < w; x++)
-        if (Math.random() > 0.35) blocks.push(`<rect x="${x*10}" y="${y*10}" width="10" height="10" fill="${color}"/>`);
-    return `<svg viewBox="0 0 ${w*10} ${h*10}" xmlns="http://www.w3.org/2000/svg">${blocks.join("")}</svg>`;
-  };
-
-  /* ============ 渲染 ============ */
-  document.getElementById("bg").innerHTML = gridSvg(buildBackground());
-  document.getElementById("avatar").innerHTML = pixelSvg(AVATAR_MAP, AVATAR_PALETTE);
-  document.getElementById("cloud-a").innerHTML = cloudSvg(18, 4, "#D9A6B8");
-  document.getElementById("cloud-b").innerHTML = cloudSvg(12, 3, "#C895AE");
-  document.getElementById("cloud-c").innerHTML = cloudSvg(15, 3, "#E3B5A6");
-
   /* ============ 交互：点击任意处开始 ============ */
   const stage = document.getElementById("stage");
   stage.addEventListener("click", () => document.body.classList.add("started"));
